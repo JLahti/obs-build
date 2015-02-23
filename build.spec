@@ -21,10 +21,12 @@ Name:           build
 Summary:        A Script to Build SUSE Linux RPMs
 License:        GPL-2.0+
 Group:          Development/Tools/Building
-Version: 20140801
-Release: mer1
+Version: 20140801.skytree38
+Release: 1
 #!BuildIgnore:  build-mkbaselibs
 Source:         obs-build-%{version}.tar.bz2
+Patch1:	0001-Changing-one-BUILD_ROOT-to-BUILD_TARGET.patch
+Patch2:	0002-Fixing-UTC-symlink-resolving-when-setting-localtime.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildArch:      noarch
 # Manual requires to avoid hard require to bash-static
@@ -121,6 +123,8 @@ chroot or a secure virtualized
 
 %prep
 %setup -q -n src
+%patch1 -p1
+%patch2 -p1
 
 %build
 
