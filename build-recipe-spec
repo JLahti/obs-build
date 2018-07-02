@@ -169,10 +169,19 @@ recipe_build_spec() {
     if test -e $BUILD_ROOT/$TOPDIR/SOURCES/build.script ; then
 	cp $BUILD_ROOT/$TOPDIR/SOURCES/build.script $BUILD_TARGET/.build.command
     fi
+    # This will hang a worker until the job is killed manually or the
+    # worker times out
+    if test -e $BUILD_ROOT/$TOPDIR/SOURCES/givemeshell_I_know_this_hangs_obs_workers ; then
+	RUN_SHELL=1
+    fi
     chmod 755 $BUILD_TARGET/.build.command
     check_exit
     if test -n "$RUN_SHELL"; then
+        echo In bash shell on $HOST
+	echo Run /.build.command to run the build
+	echo touch /.build.success to mark the build as succeeded
 	enter_target needroot bash
+	test -e $BUILD_TARGET/.build.success && BUILD_SUCCEEDED=true
     else
 	enter_target needuser /.build.command < /dev/null && BUILD_SUCCEEDED=true
     fi
