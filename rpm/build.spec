@@ -24,10 +24,12 @@ License:        GPL-2.0+ and GPL-2.0
 Group:          Development/Tools/Building
 Version:        20171122
 Release:        0
-Source:         obs-build-%{version}.tar.gz
+Source:         build-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildArch:      noarch
 #!BuildIgnore:  build-mkbaselibs build-mkbaselibs-sle
+# Manual requires to avoid hard require to bash-static
+AutoReqProv:    off
 # Keep the following dependencies in sync with obs-worker package
 Requires:       bash
 Requires:       binutils
@@ -54,6 +56,24 @@ Recommends:     perl(YAML::LibYAML)
 Recommends:     bsdtar
 Recommends:     qemu-linux-user
 %endif
+
+# Manually list the Provides since AutoProvReq is off
+Provides:       obs-build = %{version}-%{release}
+Provides:       perl(Build)
+Provides:       perl(Build::Arch)
+Provides:       perl(Build::Archrepo)
+Provides:       perl(Build::Collax)
+Provides:       perl(Build::Deb)
+Provides:       perl(Build::Debrepo)
+Provides:       perl(Build::Kiwi)
+Provides:       perl(Build::LiveBuild)
+Provides:       perl(Build::Mdkrepo)
+Provides:       perl(Build::Repo)
+Provides:       perl(Build::Rpm)
+Provides:       perl(Build::Rpmmd)
+Provides:       perl(Build::SimpleXML)
+Provides:       perl(Build::Susetags)
+Provides:       perl(Build::Zypp)
 
 %if 0%{?suse_version} > 1120 || ! 0%{?suse_version}
 Requires:       build-mkbaselibs
@@ -113,7 +133,7 @@ This package provides a script for building RPMs for SUSE Linux in a
 chroot or a secure virtualized
 
 %prep
-%setup -q -n obs-build-%version
+%setup -q
 
 %build
 %if 0%{?suse_version}
