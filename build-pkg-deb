@@ -32,11 +32,13 @@ deb_chroot ()
     # when doing a 'chroot /' call lets subshell and change dir manually
     #
     (
-	cd $1 &&
+	# Ignore first argument (it's always $BUILD_ROOT)
+	shift
+	cd "$BUILD_ROOT" &&
 	    DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical \
 			   DEBCONF_NONINTERACTIVE_SEEN=true \
 			   LC_ALL=C LANGUAGE=C LANG=C \
-			   chroot $*
+			   enter_target needroot $*
     )
 }
 

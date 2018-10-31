@@ -88,6 +88,40 @@ check_exit() {
     fi
 }
 
+
+shellquote()
+{
+    for arg; do
+	arg=${arg/\\/\\\\}
+	arg=${arg/\$/\\\$}
+	arg=${arg/\"/\\\"}
+	arg=${arg/\`/\\\`}
+	echo -n " \"$arg\""
+    done
+}
+
+
+# chroot-like wrapper, enter_target <mode: needroot|user> $TARGET commands
+# needroot - operations that need to be done as root, like unpacking into file system, etc
+# needuser - operations that will be done as non-root user
+
+enter_target() {
+    test -z "${BUILD_TARGET}" && BUILD_TARGET=${BUILD_ROOT}
+    if [ x$1 == xneeduser ]; then
+	shift
+	PARAMS=`shellquote "$@"`
+	chroot $BUILD_TARGET su -c "$PARAMS" - $BUILD_USER
+    elif [ x$1 == xneedscript ]; then
+	shift
+	SCRIPT=$1
+	shift
+	chroot $BUILD_TARGET su -s $SCRIPT $BUILD_USER -- "$@"
+    else
+	shift
+	chroot $BUILD_TARGET "$@"
+    fi
+}
+
 check_use_emulator() {
     INITVM_NAME=
     # check if the extended host arch contains the build arch
@@ -109,6 +143,8 @@ check_use_emulator() {
     if test -e "$BUILD_DIR/$INITVM_NAME" -a -e "$BUILD_DIR/qemu-reg" ; then
 	chmod 0755 "$BUILD_DIR/$INITVM_NAME"
 	return 0	# chroot build, we need to run
+    elif test -n "$BUILD_SB2FLAGS" ; then
+	return 0	# Use sb2
     fi
     # XXX: error?
     echo "Warning: cross compile not possible due to missing static binaries. please install build-initvm package for that purpose."

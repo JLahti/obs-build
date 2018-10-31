@@ -233,7 +233,7 @@ preinstall() {
 }
 
 run_pkg_scripts() {
-    chroot $BUILD_ROOT /sbin/ldconfig 2>/dev/null
+    enter_target needroot /sbin/ldconfig 2>/dev/null
     for PKG in $PACKAGES_TO_RUNSCRIPTS ; do
 	pkg_runscripts
 	check_exit
@@ -915,7 +915,7 @@ done
 rm -rf "$BUILD_ROOT/installed-pkg"
 mkdir -p "$BUILD_ROOT/installed-pkg"
 
-test -x $BUILD_ROOT/sbin/ldconfig && chroot $BUILD_ROOT /sbin/ldconfig 2>&1
+test -x $BUILD_ROOT/sbin/ldconfig && enter_target needroot /sbin/ldconfig 2>&1
 
 MAIN_LIST="$PACKAGES_TO_INSTALL"
 progress_setup MAIN_LIST
@@ -1028,10 +1028,10 @@ done
 
 echo now finalizing build dir...
 if test -x $BUILD_ROOT/sbin/ldconfig ; then
-	CHROOT_RETURN="`chroot $BUILD_ROOT /sbin/ldconfig 2>&1`"
+	CHROOT_RETURN="`enter_target needroot /sbin/ldconfig 2>&1`"
 	case "$CHROOT_RETURN" in
 	    *warning:*)
-		chroot $BUILD_ROOT /sbin/ldconfig
+		enter_target needroot /sbin/ldconfig
 		echo
 		echo chroot $BUILD_ROOT /sbin/ldconfig
 		echo
@@ -1045,7 +1045,7 @@ if test -x $BUILD_ROOT/sbin/ldconfig ; then
 fi
 
 if test -x $BUILD_ROOT/usr/sbin/Check && ! grep -q "/usr/sbin/Check is obsolete" $BUILD_ROOT/usr/sbin/Check ; then
-    chroot $BUILD_ROOT /usr/sbin/Check
+    enter_target needroot /usr/sbin/Check
 fi
 
 mkdir -p $BUILD_ROOT/var/adm/packages
@@ -1053,24 +1053,24 @@ touch $BUILD_ROOT/var/adm/packages
 
 if test -x $BUILD_ROOT/sbin/SuSEconfig ; then
     if grep norestarts $BUILD_ROOT/sbin/SuSEconfig > /dev/null ; then
-	chroot $BUILD_ROOT /sbin/SuSEconfig --norestarts --force
+	enter_target needroot /sbin/SuSEconfig --norestarts --force
     else
-	chroot $BUILD_ROOT /sbin/SuSEconfig --force
+	enter_target needroot /sbin/SuSEconfig --force
     fi
 fi
 
 if test -x $BUILD_ROOT/usr/X11R6/bin/switch2mesasoft ; then
-    chroot $BUILD_ROOT /usr/X11R6/bin/switch2mesasoft
+    enter_target needroot /usr/X11R6/bin/switch2mesasoft
 fi
 
 for PROG in /usr/bin/TeX/texhash /usr/bin/texhash ; do
     test -x $BUILD_ROOT/$PROG && \
-	chroot $BUILD_ROOT bash -c ". /etc/profile ; $PROG"
+	enter_target needroot bash -c ". /etc/profile ; $PROG"
 done
 
 if test -e $BUILD_ROOT/usr/share/zoneinfo/UTC ; then
     for PROG in /usr/sbin/zic /usr/bin/zic /bin/zic /sbin/zic ; do
-        test -x $BUILD_ROOT/$PROG  && chroot $BUILD_ROOT bash -c "$PROG -l \$(readlink -f /usr/share/zoneinfo/UTC)"
+        test -x $BUILD_ROOT/$PROG  && enter_target needroot bash -c "$PROG -l \$(readlink -f /usr/share/zoneinfo/UTC)"
     done
 fi
 
@@ -1087,7 +1087,7 @@ fi
 # XXX: still needed?
 if test -x $BUILD_ROOT/bin/rpm -a ! -f $BUILD_ROOT/var/lib/rpm/packages.rpm -a ! -f $BUILD_ROOT/var/lib/rpm/Packages ; then
     pkg_initdb_rpm
-    chroot $BUILD_ROOT rpm -q --whatprovides rpm >/dev/null 2>&1	# create provides index
+    enter_target needroot rpm -q --whatprovides rpm >/dev/null 2>&1	# create provides index
 fi
 rm -f $BUILD_ROOT/.rpmmacros $BUILD_ROOT/root/.rpmmacros
 rm -rf "$BUILD_ROOT/.init_b_cache"
