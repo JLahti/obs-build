@@ -79,10 +79,11 @@ rpm_init_cumulate() {
     CUMULATED_PIDS=()
     CUMULATED_HMD5=()
     DO_CUMULATE=
-    typeset -ri suse_version=$(enter_target needroot rpm --eval '%{?suse_version}' 2>/dev/null)
-    if ((suse_version > 1220)) ; then 
+# Always cumulate
+#    typeset -ri suse_version=$(enter_target needroot rpm --eval '%{?suse_version}' 2>/dev/null)
+#    if ((suse_version > 1220)) ; then 
 	DO_CUMULATE=true
-    fi
+#    fi
 }
 
 pkg_verify_installed_rpm() {
